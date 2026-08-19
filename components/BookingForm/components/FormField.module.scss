@@ -1,0 +1,19 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+  min-width: 0;
+}
+
+.label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: $color-text;
+}
+
+.error {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: $color-error;
+  overflow-wrap: anywhere;
+}
