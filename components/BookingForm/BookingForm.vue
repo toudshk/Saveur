@@ -18,9 +18,11 @@ import {
   getMaxBookingDateString,
   getMinBookingDateString,
 } from '~/utils/booking/date.utils'
-import { formatPhoneInput } from '~/utils/booking/normalizePhone'
-import { getFieldErrorId } from '~/utils/booking/getFieldErrorId'
-import FormField from './components/FormField.vue'
+import Button from '~/components/ui/Button/Button.vue'
+import DateInput from '~/components/ui/DateInput/DateInput.vue'
+import PhoneInput from '~/components/ui/PhoneInput/PhoneInput.vue'
+import SelectInput from '~/components/ui/SelectInput/SelectInput.vue'
+import TextInput from '~/components/ui/TextInput/TextInput.vue'
 import styles from './BookingForm.module.scss'
 
 const { form, errors, status, handleBlur, submit } = useBookingForm()
@@ -37,14 +39,6 @@ onMounted(() => {
   maxDate.value = getMaxBookingDateString()
 })
 
-function isInvalid(error?: string): boolean {
-  return Boolean(error)
-}
-
-function describedBy(fieldId: string, error?: string): string | undefined {
-  return error ? getFieldErrorId(fieldId) : undefined
-}
-
 function focusFirstInvalidField(): void {
   for (const field of BOOKING_FIELDS) {
     if (!errors.value[field]) {
@@ -60,26 +54,6 @@ async function handleSubmit(): Promise<void> {
   await submit()
   focusFirstInvalidField()
 }
-
-function handlePhoneInput(event: Event): void {
-  const target = event.target
-
-  if (!(target instanceof HTMLInputElement)) {
-    return
-  }
-
-  form.phone = formatPhoneInput(target.value)
-}
-
-function preventLetterInput(event: Event): void {
-  if (!(event instanceof InputEvent) || event.inputType !== 'insertText' || !event.data) {
-    return
-  }
-
-  if (/\p{L}/u.test(event.data)) {
-    event.preventDefault()
-  }
-}
 </script>
 
 <template>
@@ -92,119 +66,64 @@ function preventLetterInput(event: Event): void {
     <fieldset :class="styles.fields" :disabled="isLoading">
       <legend :class="styles.legend">{{ BOOKING_FORM_TITLE }}</legend>
 
-      <FormField
-        :label="BOOKING_FIELD_LABELS.name"
+      <TextInput
+        v-model="form.name"
         :field-id="BOOKING_FIELD_IDS.name"
+        :label="BOOKING_FIELD_LABELS.name"
         :error="errors.name"
-      >
-        <input
-          :id="BOOKING_FIELD_IDS.name"
-          v-model="form.name"
-          :class="styles.control"
-          type="text"
-          name="name"
-          autocomplete="name"
-          required
-          :aria-invalid="isInvalid(errors.name)"
-          :aria-describedby="describedBy(BOOKING_FIELD_IDS.name, errors.name)"
-          @blur="handleBlur('name')"
-        />
-      </FormField>
+        autocomplete="name"
+        @blur="handleBlur('name')"
+      />
 
-      <FormField
-        :label="BOOKING_FIELD_LABELS.phone"
+      <PhoneInput
+        v-model="form.phone"
         :field-id="BOOKING_FIELD_IDS.phone"
+        :label="BOOKING_FIELD_LABELS.phone"
         :error="errors.phone"
-      >
-        <input
-          :id="BOOKING_FIELD_IDS.phone"
-          :value="form.phone"
-          :class="styles.control"
-          type="tel"
-          name="phone"
-          autocomplete="tel"
-          inputmode="numeric"
-          maxlength="18"
-          required
-          :placeholder="BOOKING_PHONE_PLACEHOLDER"
-          :aria-invalid="isInvalid(errors.phone)"
-          :aria-describedby="describedBy(BOOKING_FIELD_IDS.phone, errors.phone)"
-          @beforeinput="preventLetterInput"
-          @input="handlePhoneInput"
-          @blur="handleBlur('phone')"
-        />
-      </FormField>
+        :placeholder="BOOKING_PHONE_PLACEHOLDER"
+        @blur="handleBlur('phone')"
+      />
 
       <div :class="styles.row">
-        <FormField
-          :label="BOOKING_FIELD_LABELS.date"
+        <DateInput
+          v-model="form.date"
           :field-id="BOOKING_FIELD_IDS.date"
+          :label="BOOKING_FIELD_LABELS.date"
           :error="errors.date"
-        >
-          <input
-            :id="BOOKING_FIELD_IDS.date"
-            v-model="form.date"
-            :class="[styles.control, styles.date]"
-            type="date"
-            name="date"
-            required
-            :min="minDate"
-            :max="maxDate"
-            :aria-invalid="isInvalid(errors.date)"
-            :aria-describedby="describedBy(BOOKING_FIELD_IDS.date, errors.date)"
-            @beforeinput="preventLetterInput"
-            @blur="handleBlur('date')"
-          />
-        </FormField>
+          :min="minDate"
+          :max="maxDate"
+          @blur="handleBlur('date')"
+        />
 
-        <FormField
-          :label="BOOKING_FIELD_LABELS.time"
+        <SelectInput
+          v-model="form.time"
           :field-id="BOOKING_FIELD_IDS.time"
+          :label="BOOKING_FIELD_LABELS.time"
           :error="errors.time"
+          @blur="handleBlur('time')"
         >
-          <select
-            :id="BOOKING_FIELD_IDS.time"
-            v-model="form.time"
-            :class="[styles.control, styles.select]"
-            name="time"
-            required
-            :aria-invalid="isInvalid(errors.time)"
-            :aria-describedby="describedBy(BOOKING_FIELD_IDS.time, errors.time)"
-            @blur="handleBlur('time')"
-          >
-            <option value="" disabled>{{ BOOKING_TIME_PLACEHOLDER }}</option>
-            <option v-for="slot in TIME_SLOTS" :key="slot" :value="slot">
-              {{ slot }}
-            </option>
-          </select>
-        </FormField>
+          <option value="" disabled>{{ BOOKING_TIME_PLACEHOLDER }}</option>
+          <option v-for="slot in TIME_SLOTS" :key="slot" :value="slot">
+            {{ slot }}
+          </option>
+        </SelectInput>
       </div>
 
-      <FormField
-        :label="BOOKING_FIELD_LABELS.guests"
+      <SelectInput
+        v-model.number="form.guests"
         :field-id="BOOKING_FIELD_IDS.guests"
+        :label="BOOKING_FIELD_LABELS.guests"
         :error="errors.guests"
+        @blur="handleBlur('guests')"
       >
-        <select
-          :id="BOOKING_FIELD_IDS.guests"
-          v-model.number="form.guests"
-          :class="[styles.control, styles.select]"
-          name="guests"
-          required
-          :aria-invalid="isInvalid(errors.guests)"
-          :aria-describedby="describedBy(BOOKING_FIELD_IDS.guests, errors.guests)"
-          @blur="handleBlur('guests')"
-        >
-          <option v-for="guestCount in GUEST_OPTIONS" :key="guestCount" :value="guestCount">
-            {{ guestCount }}
-          </option>
-        </select>
-      </FormField>
+        <option v-for="guestCount in GUEST_OPTIONS" :key="guestCount" :value="guestCount">
+          {{ guestCount }}
+        </option>
+      </SelectInput>
     </fieldset>
 
-    <button :class="styles.submit" type="submit" :disabled="isLoading">
-      <span v-if="isLoading" :class="styles.spinner" aria-hidden="true" />
-      <span>{{ submitLabel }}</span>
-    </button>
+    <Button type="submit" :loading="isLoading" :disabled="isLoading">
+      {{ submitLabel }}
+    </Button>
   </form>
 </template>

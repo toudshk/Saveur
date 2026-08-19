@@ -1,0 +1,46 @@
+.control {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  padding: $spacing-md;
+  color: $color-text;
+  background-color: $color-surface;
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+
+  &:focus {
+    border-color: $color-accent;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+
+  &::placeholder {
+    color: $color-muted;
+  }
+
+  &[aria-invalid='true'] {
+    border-color: $color-error;
+  }
+}
+
+.select {
+  appearance: none;
+  padding-right: calc(#{$spacing-md} * 2 + 1rem);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' viewBox='0 0 16 16'%3E%3Cpath stroke='%231c1917' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right $spacing-md center;
+  background-size: 1rem 1rem;
+}
+
+.date {
+  cursor: pointer;
+  padding-right: calc(#{$spacing-md} * 2);
+
+  &::-webkit-calendar-picker-indicator {
+    margin-inline-end: $spacing-sm;
+    cursor: pointer;
+  }
+}
